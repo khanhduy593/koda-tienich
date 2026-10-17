@@ -1,0 +1,39 @@
+APP TIỆN ÍCH – HƯỚNG DẪN NHANH
+==============================
+
+1) CHẠY APP
+- Đưa cả thư mục này lên một nơi có địa chỉ https (GitHub Pages, Netlify, Cloudflare Pages… đều miễn phí).
+- Mở địa chỉ đó bằng Safari trên iPhone → nút Chia sẻ → "Thêm vào Màn hình chính".
+- Mở từ biểu tượng trên màn hình chính, app chạy toàn màn hình, không còn thanh công cụ Safari.
+- Khi cập nhật file, tăng số trong dòng  const V='tienich-v10'  ở file sw.js để điện thoại tải bản mới.
+
+2) TRỢ LÝ KoDa
+KoDa là linh vật hướng dẫn: bấm một câu hỏi, KoDa trả lời ngay bằng nội dung soạn sẵn và số liệu có trong app.
+Không dùng AI nên KHÔNG cần khóa API, không cần mạng, không tốn phí.
+Muốn thêm câu hỏi: mở file tools-koda.js, tìm danh sách  const Q=[ ... ]  rồi thêm một dòng theo mẫu
+  {c:'tc',q:'Câu hỏi?',go:'vang',a:()=>'Câu trả lời'}
+(c = nhóm: tc/tg/ds/cc/app; go = mã tiện ích sẽ có nút "Mở"; dùng \n để xuống dòng, **chữ** để in đậm). Nhớ tăng version ở sw.js.
+
+3) DỮ LIỆU "BẢN CHỤP"
+Giá vàng (SJC, 24K, 18K), chứng khoán, xăng và kết quả xổ số miền Nam là bản chụp có ghi rõ ngày giờ và nguồn,
+không sửa được trong app. Muốn cập nhật: sửa file data.js (số liệu + ngày giờ chụp) rồi tăng số version ở sw.js.
+Thời tiết và tỷ giá tự cập nhật khi có mạng.
+
+4) THỜI TIẾT THEO PHƯỜNG
+Bấm "Vị trí hiện tại" và cho phép định vị; hoặc gõ tên phường/xã vào ô tìm. Dự báo 7 ngày lấy từ Open-Meteo (lưới khoảng 10 km),
+tên phường lấy từ OpenStreetMap nên có thể chưa theo đơn vị hành chính mới nhất.
+
+
+TIỆN ÍCH MỚI: Mã QR nhận tiền (VietQR), Tung xúc xắc/đồng xu, Vòng quay may mắn, Hỏi đáp vui, Trò chơi (Lật hình, 2048). Đã bỏ Mật khẩu nhanh.
+KoDa: câu hỏi viết tự nhiên (không có chữ "KoDa ơi"), 4 thẻ ngẫu nhiên đổi mỗi vài giây ở trang chính. Trang chính có nhiệt độ hiện tại (bấm để xem thời tiết).
+
+Trang chính: câu chào theo buổi, lời nhắn của KoDa theo thời tiết/giờ, "Ngày này năm xưa" (file history.js, dòng dạng tháng-ngày: "năm: nội dung") và "Câu nói hay" (TI.QUOTES trong history.js). Đã bỏ đồng hồ giờ phút.
+
+Ghi chú: Mã QR nhận tiền không tự tra được tên chủ thẻ vì tên nằm ở ngân hàng; app tự điền tên nếu tài khoản đó đã lưu trước.
+
+KoDa nhắn tin: ô gõ câu hỏi ở cuối màn hình KoDa. Bộ não nằm ở koda-brain.js (từ khóa từng tiện ích trong bảng T, các hàm tính như tỷ giá, xăng, vay...). Câu ngoài phạm vi app KoDa sẽ báo lại.
+
+Giá mới nhất: file live.js tự lấy qua mạng giá vàng SJC (sjc.com.vn), chỉ số chứng khoán (DNSE), xăng dầu (Petrolimex vùng 1) và tỷ giá (Vietcombank/open.er-api). Cập nhật khi mở app, khi quay lại app, mỗi 5 phút, và ngay trước khi KoDa trả lời câu hỏi về giá. Mất mạng hoặc nguồn lỗi thì dùng số liệu gần nhất và KoDa có báo rõ. Vàng PNJ 24K/18K, xổ số, điện, nước vẫn là số liệu có sẵn.
+
+Cập nhật mới: đã bỏ mục điện và nước (giá ít đổi, không có nguồn lấy tự động). Xổ số miền Nam lấy qua mạng từ 3 trang (xosodaiphat.com, xskt.com.vn, minhngoc.com.vn): kiểm tra đúng số giải/số chữ số, trang nào hỏng thì bỏ qua, các trang lệch nhau thì lấy kết quả được nhiều trang trùng nhất. Nếu một trang đổi giao diện, chỉnh hàm parseLottery và danh sách XSRC trong live.js.
+KoDa có 54 biểu cảm/động tác (file koda-face.js): đổi theo giờ, thời tiết, câu hỏi và khi chạm vào KoDa; chạy ngầm, không có nút chọn. Mục "Tăng giảm %" tính giá sau giảm/tăng, % thay đổi, giảm nhiều lần. Màn chào "Xin chào" kết thúc nhanh hơn (khoảng 1 giây).
