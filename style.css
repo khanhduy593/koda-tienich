@@ -365,3 +365,13 @@ svg.koda-av.a-cover .k-ear.r{transform:translate(-17px,-6px) rotate(90deg);trans
 @keyframes aflap{0%,100%{transform:rotate(0)}50%{transform:rotate(26deg) translateY(-3px)}}
 @media (prefers-reduced-motion:reduce){svg.koda-av,svg.koda-av *{animation:none!important}}
 
+/* nút làm mới dữ liệu */
+.rfbar{margin-bottom:12px}
+.rfbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800}
+.rfbtn .rfi{display:inline-block;font-size:18px;line-height:1}
+.rfbtn.busy .rfi{animation:rfspin .8s linear infinite}
+.rfbtn:disabled{opacity:.7}
+@keyframes rfspin{to{transform:rotate(360deg)}}
+.rfmsg{margin-top:6px;font-size:13px;color:var(--mut);min-height:18px;line-height:1.4}
+.rfmsg.bad{color:var(--tx)}
+@media (prefers-reduced-motion:reduce){.rfbtn.busy .rfi{animation:none}}

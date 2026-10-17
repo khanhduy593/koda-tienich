@@ -262,7 +262,8 @@ const capText=iso8=>{const d=new Date(iso8);return `${pad(d.getHours())}:${pad(d
 function snapHead(D){
   const age=Date.now()-new Date(D.captured).getTime(),h=Math.floor(age/36e5);
   const stale=age>864e5?`<div class="banner">Bản chụp đã ${h>=48?Math.floor(h/24)+' ngày':h+' giờ'} trước, giá thực tế có thể đã đổi.</div>`:'';
-  return stale+`<div class="res" style="margin-bottom:12px">${rr(D.dataLabel,esc(D.dataTime))}${rr(D.live?'Lấy lúc':'Chụp lúc',capText(D.captured))}${rr('Nguồn',`<a class="lnk" href="${esc(D.url)}" target="_blank" rel="noopener">${esc(D.source)}</a>`)}</div>`;
+  const rk=['vang','ck','xang'].find(k=>DATA[k]===D),bar=rk&&TI.refreshBar?TI.refreshBar(rk):'';
+  return bar+stale+`<div class="res" style="margin-bottom:12px">${rr(D.dataLabel,esc(D.dataTime))}${rr(D.live?'Lấy lúc':'Chụp lúc',capText(D.captured))}${rr('Nguồn',`<a class="lnk" href="${esc(D.url)}" target="_blank" rel="noopener">${esc(D.source)}</a>`)}</div>`;
 }
 const snapFoot=D=>`<div class="note">${esc(D.note||'')}<br>${D.live?'Giá được lấy mới qua mạng khi bạn mở app, không chỉnh sửa trong app.':'Chưa lấy được giá mới qua mạng nên đang hiển thị bản chụp, không chỉnh sửa trong app.'}</div>`;
 function snapTable(s){return `<h2>${esc(s.title)}</h2><div class="card tw"><table><tr>${s.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${s.rows.map(r=>`<tr>${r.map((c,ci)=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table></div>`}

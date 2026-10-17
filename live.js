@@ -2,7 +2,7 @@
    Khi có mạng: lấy số liệu mới và ghi đè lên bản chụp sẵn trong DATA. Mất mạng hoặc lỗi: giữ bản gần nhất đã có. */
 (function(){
 'use strict';
-const {store,pad}=TI;
+const {store,pad,esc}=TI;
 const TTL=3*60e3,OKAGE=10*60e3;
 const KEY={vang:'vang',ck:'ck',xang:'xang',fx:'fx',xs:'xs'};
 const st={vang:{},ck:{},xang:{},fx:{},xs:{}};
@@ -14,8 +14,8 @@ const stamp=d=>{const p=vnParts(d);return `${p.hour}:${p.minute} · ${p.day}/${p
 
 /* gọi trực tiếp và qua 2 cầu nối CORS song song, lấy cái nào về đúng trước */
 function race(url,parse,ms){
-  const us=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url)];
-  return Promise.any(us.map(async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||7000);
+  const q=encodeURIComponent(url),us=[[url,0],['https://corsproxy.io/?url='+q,0],['https://api.allorigins.win/raw?url='+q,0],['https://api.codetabs.com/v1/proxy?quest='+q,2200],['https://thingproxy.freeboard.io/fetch/'+url,2200]];
+  return Promise.any(us.map(async([u,d])=>{if(d)await new Promise(r=>setTimeout(r,d));const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||7000);
     try{const r=await fetch(u,{signal:c.signal,cache:'no-store'});if(!r.ok)throw new Error('http '+r.status);return parse(await r.text())}finally{clearTimeout(t)}}));
 }
 const bad=()=>{throw new Error('dữ liệu không hợp lệ')};
@@ -145,8 +145,8 @@ function ensure(kind,force){
   if(s.p)return s.p;
   if(!force&&s.at&&Date.now()-s.at<(TTLK[kind]||TTL))return Promise.resolve(false);
   if(navigator.onLine===false){return Promise.resolve(false)}
-  s.p=FETCH[kind]().then(patch=>{apply(kind,patch);const now=Date.now();s.at=now;s.okAt=now;store.set('live_'+kind,{at:now,patch});lis.forEach(f=>{try{f(kind)}catch(e){}});return true})
-    .catch(()=>{s.at=Date.now()-(TTLK[kind]||TTL)+30e3;return false}).finally(()=>{s.p=null});
+  s.p=FETCH[kind]().then(patch=>{apply(kind,patch);const now=Date.now();s.at=now;s.okAt=now;s.err='';store.set('live_'+kind,{at:now,patch});lis.forEach(f=>{try{f(kind)}catch(e){}});return true})
+    .catch(e=>{s.at=Date.now()-(TTLK[kind]||TTL)+30e3;const l=(e&&e.errors?e.errors:[e]).map(x=>String(x&&x.message||x).replace(/^Failed to fetch$/i,'bị chặn hoặc không kết nối').replace(/^The user aborted.*$/i,'quá thời gian chờ').replace(/^Load failed$/i,'bị chặn hoặc không kết nối').slice(0,40));s.err=[...new Set(l)].slice(0,3).join('; ');return false}).finally(()=>{s.p=null});
   return s.p;
 }
 const wait=(kinds,ms)=>Promise.race([Promise.all(kinds.map(k=>ensure(k))),new Promise(r=>setTimeout(r,ms||5500))]);
@@ -163,7 +163,26 @@ function kindsFor(n){
 }
 function refreshAll(force){return Promise.all(Object.keys(FETCH).filter(k=>k!=='xs'||force===true).map(k=>ensure(k,force)))}
 TI.liveNote=kinds=>{const s=stale(kinds);if(!s.length)return '';const k=s[0],D=DATA[KEY[k]],t=k==='fx'?stamp(new Date(D.asOf)):k==='xs'?stamp(new Date(D.captured)):String(D.dataTime).split(' (')[0];return `\n\n(Chưa lấy được giá mới nhất qua mạng, mình đang dùng số liệu lúc ${t}.)`};
-TI.live={ensure,wait,isLive,stale,kindsFor,refreshAll,on:f=>{lis.add(f);return()=>lis.delete(f)},stamp};
+const NAME={vang:'giá vàng',ck:'chứng khoán',xang:'giá xăng dầu',fx:'tỷ giá',xs:'xổ số'};
+const msgs={};
+function whenOf(k){const D=DATA[KEY[k]];return k==='xs'||k==='fx'?stamp(new Date(k==='fx'?D.asOf:D.captured)):String(D.dataTime||'').split(' (')[0]}
+async function refresh(kind){
+  const was=st[kind].okAt||0;
+  const ok=await ensure(kind,true);
+  const m=ok?{ok:true,t:'Đã cập nhật lúc '+stamp(new Date())+'.'}:{ok:false,t:(navigator.onLine===false?'Không có mạng. ':'Chưa lấy được số mới'+(st[kind].err?' ('+st[kind].err+')':'')+'. ')+'Đang hiển thị số liệu lúc '+whenOf(kind)+'.'};
+  msgs[kind]={...m,at:Date.now()};return m;
+}
+TI.refreshBar=kind=>{const m=msgs[kind],show=m&&Date.now()-m.at<120e3;
+  return `<div class="rfbar"><button class="btn ghost rfbtn" data-rf="${kind}" type="button"><span class="rfi">↻</span> Làm mới ${NAME[kind]}</button><div class="rfmsg${show&&!m.ok?' bad':''}" id="rfm">${show?esc(m.t):''}</div></div>`};
+document.addEventListener('click',async e=>{
+  const b=e.target.closest&&e.target.closest('[data-rf]');if(!b||b.disabled)return;const kind=b.dataset.rf,msg=document.getElementById('rfm');
+  b.disabled=true;b.classList.add('busy');if(msg){msg.className='rfmsg';msg.textContent='Đang lấy số liệu mới…'}
+  const m=await refresh(kind);
+  const b2=document.querySelector('[data-rf="'+kind+'"]'),m2=document.getElementById('rfm');
+  if(b2){b2.disabled=false;b2.classList.remove('busy')}
+  if(m2){m2.className='rfmsg'+(m.ok?'':' bad');m2.textContent=m.t}
+});
+TI.live={refresh,ensure,wait,isLive,stale,kindsFor,refreshAll,on:f=>{lis.add(f);return()=>lis.delete(f)},stamp};
 /* tự làm mới khi mở app, khi quay lại app và mỗi 5 phút lúc đang mở */
 setTimeout(()=>refreshAll(),300);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll()});

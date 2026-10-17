@@ -195,7 +195,7 @@ const ptISO=s=>new Date(s+'T00:00:00');
 function lotteryTool(el){
   if(TI.live)TI.live.ensure('xs');
   const X=DATA.xs,keys=Object.keys(X.days).sort().reverse();
-  const head=`<div class="res" style="margin-bottom:12px">${rr('Số liệu',`${keys.length} ngày gần nhất (đến ${dstr(ptISO(X.latest))})`)}${rr(X.live?'Lấy lúc':'Chụp lúc',capText(X.captured))}${rr('Nguồn',X.links.map(l=>`<a class="lnk" href="${esc(l[1])}" target="_blank" rel="noopener">${esc(l[0])}</a>`).join(', '))}</div>`;
+  const head=(TI.refreshBar?TI.refreshBar('xs'):'')+`<div class="res" style="margin-bottom:12px">${rr('Số liệu',`${keys.length} ngày gần nhất (đến ${dstr(ptISO(X.latest))})`)}${rr(X.live?'Lấy lúc':'Chụp lúc',capText(X.captured))}${rr('Nguồn',X.links.map(l=>`<a class="lnk" href="${esc(l[1])}" target="_blank" rel="noopener">${esc(l[0])}</a>`).join(', '))}</div>`;
   const foot=`<div class="note">${esc(X.note)}</div>`;
   const age=Date.now()-new Date(X.captured).getTime();
   const stale=!X.live&&age>864e5?`<div class="banner">Chưa lấy được kết quả mới qua mạng. Số liệu đã lưu cách đây ${Math.floor(age/864e5)} ngày, có thể đã có kỳ xổ mới.</div>`:'';

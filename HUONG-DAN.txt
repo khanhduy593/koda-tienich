@@ -37,3 +37,5 @@ Giá mới nhất: file live.js tự lấy qua mạng giá vàng SJC (sjc.com.vn
 
 Cập nhật mới: đã bỏ mục điện và nước (giá ít đổi, không có nguồn lấy tự động). Xổ số miền Nam lấy qua mạng từ 3 trang (xosodaiphat.com, xskt.com.vn, minhngoc.com.vn): kiểm tra đúng số giải/số chữ số, trang nào hỏng thì bỏ qua, các trang lệch nhau thì lấy kết quả được nhiều trang trùng nhất. Nếu một trang đổi giao diện, chỉnh hàm parseLottery và danh sách XSRC trong live.js.
 KoDa có 54 biểu cảm/động tác (file koda-face.js): đổi theo giờ, thời tiết, câu hỏi và khi chạm vào KoDa; chạy ngầm, không có nút chọn. Mục "Tăng giảm %" tính giá sau giảm/tăng, % thay đổi, giảm nhiều lần. Màn chào "Xin chào" kết thúc nhanh hơn (khoảng 1 giây).
+
+Nút "Làm mới": có ở Giá vàng, Chứng khoán, Giá xăng dầu, Xổ số (hàm TI.refreshBar và TI.live.refresh trong live.js). Nếu không lấy được, nút báo lý do ngắn (ví dụ http 403, bị chặn hoặc không kết nối) và giờ của số liệu đang hiển thị. Trang vàng PNJ 24K/18K vẫn là số liệu có sẵn.
