@@ -1,5 +1,5 @@
 // Tăng số version mỗi khi cập nhật file để điện thoại tải bản mới
-const V='tienich-v17';
+const V='tienich-v18';
 const ASSETS=['./','index.html','style.css','app.js','tools.js','tools-more.js','history.js','tools-koda.js','koda-brain.js','koda-face.js','live.js','tools-fun.js','lunar.js','data.js','lib/qr.js','manifest.webmanifest','icons/icon-192.png','icons/icon-180.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
